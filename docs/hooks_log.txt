@@ -1,0 +1,6 @@
+[2026-04-07T07:49:47Z] [TASK:?] EXIT=?        ls /home/ashishki/Documents/dev/ai-stack/projects/AI_Adoption_Diff_Tool/ && ls /home/ashishki/Documents/dev/ai-stack/projects/AI_Adoption_Diff_Tool/docs/ 2>/dev/null || echo "docs/ is empty or missing
+[2026-04-07T07:49:52Z] [TASK:?] EXIT=?        ls /home/ashishki/Documents/dev/ai-stack/projects/AI_Adoption_Diff_Tool/docs/
+[2026-04-07T07:49:58Z] [TASK:?] EXIT=?        cat /home/ashishki/Documents/dev/ai-stack/projects/AI_Adoption_Diff_Tool/docs/PROJECT_BRIEF.md
+[2026-04-07T07:50:09Z] [TASK:?] EXIT=?        ls /home/ashishki/Documents/dev/ai-stack/projects/AI_Adoption_Diff_Tool/prompts/
+[2026-04-07T07:51:45Z] [TASK:?] EXIT=?        ls /home/ashishki/Documents/dev/ai-stack/projects/AI_Adoption_Diff_Tool/docs/ && cat /home/ashishki/Documents/dev/ai-stack/projects/AI_Adoption_Diff_Tool/docs/PROJECT_BRIEF.md
+[2026-04-07T07:51:49Z] [TASK:?] EXIT=?        find /home/ashishki/Documents/dev/ai-stack/projects/AI_Adoption_Diff_Tool -name "*.md" | head -30 && echo "---" && find /home/ashishki/Documents/dev/ai-stack/projects/AI_Adoption_Diff_Tool -name "*.tx
