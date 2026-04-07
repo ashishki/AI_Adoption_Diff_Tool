@@ -32,12 +32,12 @@ The orchestrator reads all state from `docs/CODEX_PROMPT.md` and `docs/tasks.md`
 
 | Role | Tool | Why |
 |---|---|---|
-| Implementer / fixer | `Bash` → `{{CODEX_COMMAND}}` | writes files, runs tests |
+| Implementer / fixer | `Bash` → `codex exec -s workspace-write` | writes files, runs tests |
 | Light reviewer | `Agent tool` (general-purpose) | fast checklist, no docs produced |
 | Deep review agents (META/ARCH/CODE/CONSOLIDATED) | `Agent tool` (general-purpose) | reasoning + file analysis |
 | Strategy reviewer | `Agent tool` (general-purpose) | architectural reasoning |
 
-<!-- {{CODEX_COMMAND}} is the implementation agent invocation.
+<!-- codex exec -s workspace-write is the implementation agent invocation.
      Default and recommended value:
      - Codex CLI: codex exec -s workspace-write
 
@@ -53,7 +53,7 @@ The orchestrator reads all state from `docs/CODEX_PROMPT.md` and `docs/tasks.md`
 **Implementer invocation — always via variable, never stdin:**
 ```bash
 PROMPT=$(cat /tmp/orchestrator_codex_prompt.txt)
-cd {{PROJECT_ROOT}} && {{CODEX_COMMAND}} "$PROMPT"
+cd {{PROJECT_ROOT}} && codex exec -s workspace-write "$PROMPT"
 ```
 
 ---
@@ -322,7 +322,7 @@ Baseline: [N passed, N skipped, N failed]
 Execute:
 ```bash
 PROMPT=$(cat /tmp/orchestrator_codex_prompt.txt)
-cd {{PROJECT_ROOT}} && {{CODEX_COMMAND}} "$PROMPT"
+cd {{PROJECT_ROOT}} && codex exec -s workspace-write "$PROMPT"
 ```
 
 - `DONE` + 0 failures → next FIX item
@@ -385,7 +385,7 @@ Execute:
 ```bash
 export CURRENT_TASK="[T##]"   # replace [T##] with the actual task ID (e.g. T07)
 PROMPT=$(cat /tmp/orchestrator_codex_prompt.txt)
-cd {{PROJECT_ROOT}} && {{CODEX_COMMAND}} "$PROMPT"
+cd {{PROJECT_ROOT}} && codex exec -s workspace-write "$PROMPT"
 ```
 
 - `DONE` + all AC PASS + 0 failures:
@@ -660,7 +660,7 @@ Baseline: [N passed, N skipped, N failed]
 Execute:
 ```bash
 PROMPT=$(cat /tmp/orchestrator_codex_prompt.txt)
-cd {{PROJECT_ROOT}} && {{CODEX_COMMAND}} "$PROMPT"
+cd {{PROJECT_ROOT}} && codex exec -s workspace-write "$PROMPT"
 ```
 
 Re-run light reviewer on fixed files only.
@@ -689,7 +689,7 @@ Baseline: [N passed, N skipped, N failed]
 Execute:
 ```bash
 PROMPT=$(cat /tmp/orchestrator_codex_prompt.txt)
-cd {{PROJECT_ROOT}} && {{CODEX_COMMAND}} "$PROMPT"
+cd {{PROJECT_ROOT}} && codex exec -s workspace-write "$PROMPT"
 ```
 
 Re-run Steps 4.2 + 4.3 (targeted at fixed files).
@@ -886,10 +886,10 @@ Replace every `{{PLACEHOLDER}}` before using this template. The table below list
 |---|---|---|
 | `AI Adoption Diff Tool` | Human-readable project name used in agent system prompts | `my-api-service` |
 | `{{PROJECT_ROOT}}` | Absolute path to the repository root on disk | `/home/alice/my-api-service` |
-| `{{CODEX_COMMAND}}` | The implementation agent invocation — see note below | `codex exec -s workspace-write` |
+| `codex exec -s workspace-write` | The implementation agent invocation — see note below | `codex exec -s workspace-write` |
 | `{{NOTIFICATION_CHANNEL}}` | Optional out-of-band notification mechanism — see note below | Telegram bot, Slack webhook, or omit |
 
-**`{{CODEX_COMMAND}}` — implementation agent options:**
+**`codex exec -s workspace-write` — implementation agent options:**
 
 The orchestrator expects a command that:
 1. Accepts a prompt string as its final argument (via shell variable, not stdin)
