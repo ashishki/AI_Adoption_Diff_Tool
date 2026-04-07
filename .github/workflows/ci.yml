@@ -1,0 +1,42 @@
+# CI workflow for AI Adoption Diff Tool
+# Runs on every push and pull request.
+# Steps: install deps → ruff check → ruff format check → pytest
+
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Check out the repository
+      - uses: actions/checkout@v4
+
+      # Set up Python 3.11
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      # Install all dependencies including the package in editable mode
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt -e .
+
+      # Lint: ruff check catches style and correctness issues
+      - name: Ruff check
+        run: ruff check ai_adoption_diff/ tests/
+
+      # Format: ruff format --check ensures consistent formatting
+      - name: Ruff format check
+        run: ruff format --check ai_adoption_diff/ tests/
+
+      # Run the full test suite
+      # GITHUB_TOKEN is not set — unit tests must not require it
+      - name: Run tests
+        run: pytest -q
+        env:
+          AI_DIFF_LOG_LEVEL: WARNING
