@@ -1,0 +1,5 @@
+click
+structlog
+pydantic
+jinja2
+httpx
