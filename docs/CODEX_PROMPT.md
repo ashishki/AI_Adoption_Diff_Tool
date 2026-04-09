@@ -18,10 +18,10 @@ Never delete history from this file. Append; do not replace.
 ## Current State
 
 - **Phase:** 1
-- **Baseline:** 0 passing tests (pre-implementation)
-- **Ruff:** not yet configured
+- **Baseline:** 8 passing tests
+- **Ruff:** configured (ruff check passes)
 - **Last CI run:** not yet configured
-- **Last updated:** 2026-04-07
+- **Last updated:** 2026-04-09
 - **Session tokens (approx):** not yet tracked
 - **Cumulative phase tokens (approx):** not yet tracked
 
@@ -29,9 +29,9 @@ Never delete history from this file. Append; do not replace.
 
 ## Next Task
 
-**T01: Project Skeleton**
+**T03: Smoke Tests**
 
-Read T01 in `docs/tasks.md` for the full specification, acceptance criteria, and file list.
+Read T03 in `docs/tasks.md` for the full specification, acceptance criteria, and file list.
 
 ---
 
@@ -137,7 +137,8 @@ none
 
 ## Completed Tasks
 
-none
+- **T01 — Project Skeleton** (2026-04-09): Package structure, CLI stub, shared config and tracing modules. 4 tests passing. Commit: d08cc4b.
+- **T02 — CI Setup** (2026-04-09): GitHub Actions workflow, Ruff configuration, and CI validation tests. 8 tests passing. Commit: pending.
 
 ---
 
