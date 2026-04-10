@@ -18,7 +18,7 @@ Never delete history from this file. Append; do not replace.
 ## Current State
 
 - **Phase:** 2
-- **Baseline:** 32 passing tests
+- **Baseline:** 36 passing tests
 - **Ruff:** configured (ruff check passes)
 - **Last CI run:** not yet configured
 - **Last updated:** 2026-04-10
@@ -29,9 +29,9 @@ Never delete history from this file. Append; do not replace.
 
 ## Next Task
 
-**T08: Commit Size and Files-Touched Metrics**
+**T09: Churn and Rework Metrics**
 
-Read T08 in `docs/tasks.md` for the full specification, acceptance criteria, and file list.
+Read T09 in `docs/tasks.md` for the full specification, acceptance criteria, and file list.
 
 ---
 
@@ -51,8 +51,8 @@ empty (CODE-8..13 resolved 2026-04-10, commit 3fd42b1; CODE-10 deferred — trac
 
 ## Open Findings
 
-Baseline: 31 passing tests (Phase 2 gate, 2026-04-10)
-Next task: T08 — Commit Size and Files-Touched Metrics
+Baseline: 36 passing tests (post-T08, 2026-04-10)
+Next task: T09 — Churn and Rework Metrics
 
 | ID | Sev | Description | Files | Status |
 |----|-----|-------------|-------|--------|
@@ -176,6 +176,7 @@ none
 - **T05 — Adoption Anchor** (2026-04-10): Added `AnalysisWindow`, manual adoption-date validation, inclusive before/after window computation, and anchor coverage for bounds, invalid dates, empty windows, and custom window sizes. 21 tests passing. Commit: pending.
 - **T06 — Heuristic Adoption Window Inference** (2026-04-10): Added heuristic AI-config and commit-frequency signal detection, median-date inference, and confidence scoring with dedicated unit coverage. 26 tests passing. Commit: pending.
 - **T07 — Window Partitioner** (2026-04-10): Added deterministic before/after commit partitioning against `AnalysisWindow`, exclusion of out-of-window commits, adoption-date routing to `after`, and dedicated unit coverage for empty-before validation and input immutability. 31 tests passing. Commit: pending.
+- **T08 — Commit Size and Files-Touched Metrics** (2026-04-10): Added deterministic commit-size and files-touched summary metrics with manual p90 interpolation and dedicated unit coverage for fixture arithmetic, empty input, determinism, and known percentile behavior. 36 tests passing. Commit: pending.
 
 ---
 
