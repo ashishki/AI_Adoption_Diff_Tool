@@ -118,3 +118,17 @@ def test_empty_before_raises_partition_error() -> None:
 
     with pytest.raises(PartitionError, match="before window is empty"):
         partition(commits, window)
+
+
+def test_empty_after_raises_partition_error() -> None:
+    commits = [
+        _commit(datetime(2024, 1, 15, 12, 0, tzinfo=timezone.utc), sha="before"),
+    ]
+    window = AnalysisWindow(
+        before_start=date(2024, 1, 1),
+        adoption_date=date(2024, 2, 1),
+        after_end=date(2024, 3, 1),
+    )
+
+    with pytest.raises(PartitionError, match="after window is empty"):
+        partition(commits, window)

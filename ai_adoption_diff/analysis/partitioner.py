@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from ai_adoption_diff.analysis import PartitionError
 from ai_adoption_diff.analysis.anchor import AnalysisWindow
-from ai_adoption_diff.ingestion.git_reader import CommitRecord
+from ai_adoption_diff.ingestion import CommitRecord
 
 
 def partition(
@@ -25,5 +25,7 @@ def partition(
 
     if not before:
         raise PartitionError("before window is empty")
+    if not after:
+        raise PartitionError("after window is empty — no commits after adoption date")
 
     return before, after

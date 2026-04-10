@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from datetime import date, timedelta
 
 from ai_adoption_diff.analysis import AnchorError
-from ai_adoption_diff.ingestion.git_reader import CommitRecord
+from ai_adoption_diff.ingestion import CommitRecord
 
 
 @dataclass(frozen=True)

@@ -31,7 +31,7 @@ class CommitRecord:
 
 
 def _run_git(repo_path: Path, args: list[str]) -> str:
-    operation_name = "git_reader.subprocess"
+    operation_name = "git_log"
     logger = LOGGER.bind(operation_name=operation_name, trace_id=str(repo_path))
     started_at = perf_counter()
 
@@ -44,7 +44,7 @@ def _run_git(repo_path: Path, args: list[str]) -> str:
         )
     except CalledProcessError as exc:
         duration_ms = round((perf_counter() - started_at) * 1000, 3)
-        logger.info(
+        logger.debug(
             "git subprocess failed",
             success=False,
             duration_ms=duration_ms,
@@ -53,7 +53,7 @@ def _run_git(repo_path: Path, args: list[str]) -> str:
         raise
 
     duration_ms = round((perf_counter() - started_at) * 1000, 3)
-    logger.info("git subprocess completed", success=True, duration_ms=duration_ms)
+    logger.debug("git subprocess completed", success=True, duration_ms=duration_ms)
     return completed.stdout
 
 

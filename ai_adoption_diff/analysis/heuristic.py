@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from datetime import date, timedelta
 from statistics import mean, median
 
-from ai_adoption_diff.ingestion.git_reader import CommitRecord
+from ai_adoption_diff.ingestion import CommitRecord
 
 
 AI_CONFIG_FILE_PATHS = {
