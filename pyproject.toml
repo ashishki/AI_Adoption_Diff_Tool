@@ -7,7 +7,7 @@ name = "ai-adoption-diff-tool"
 version = "0.1.0"
 description = "Deterministic CLI for analyzing repository changes around AI coding tool adoption."
 readme = "docs/PROJECT_BRIEF.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = [
     "click",
     "structlog",
