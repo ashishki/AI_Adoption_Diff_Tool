@@ -1,8 +1,8 @@
 # CODEX_PROMPT.md
 
-Version: 1.3
+Version: 1.4
 Date: 2026-04-10
-Phase: 4
+Phase: 5
 
 <!--
 This file is the single source of truth for session state.
@@ -17,8 +17,8 @@ Never delete history from this file. Append; do not replace.
 
 ## Current State
 
-- **Phase:** 4
-- **Baseline:** 51 passing tests
+- **Phase:** 5
+- **Baseline:** 68 passing tests
 - **Ruff:** configured (ruff check passes)
 - **Last CI run:** not yet configured
 - **Last updated:** 2026-04-10
@@ -29,9 +29,11 @@ Never delete history from this file. Append; do not replace.
 
 ## Next Task
 
-**T12: Report Model**
+**T16: GitHub Remote Repository Support**
 
-Read T12 in `docs/tasks.md` for the full specification, acceptance criteria, and file list.
+Read T16 in `docs/tasks.md` for the full specification, acceptance criteria, and file list.
+
+⚠️ Pre-T16 mandatory: CODE-15 (fixture expansion) must be resolved before starting T17.
 
 ---
 
@@ -48,6 +50,11 @@ Next task: T12 — Report Model
 
 | ID | Sev | Description | Files | Status |
 |----|-----|-------------|-------|--------|
+- **T12 — Report Model** (2026-04-10): Added Pydantic v2 AnalysisReport model aggregating all metric results, window metadata, and confidence data. 55 tests passing. Commits: 20faa6a, 3462f93.
+- **T13 — Confidence Scorer** (2026-04-10): Added confidence scorer with score/level/caveats computation, penalty model, and 5-test coverage. 60 tests passing. Commits: 27ec15d, 8e8f20f.
+- **T14 — JSON Export** (2026-04-10): Added JSON exporter writing AnalysisReport to output_dir/report.json with auto-dir creation and overwrite. 64 tests passing. Commits: 1c59e47, 4343b98.
+- **T15 — Markdown and HTML Report Renderer** (2026-04-10): Added Jinja2-based renderer with 9-metric comparison table, confidence section, footer caveat. 68 tests passing. Commits: 41ca6c9, 6718cc8.
+
 | CODE-7 | P2 | `analyze` stub lacks `@click.option` for T17 flags | `ai_adoption_diff/cli.py:17-19` | Watch — deferred to T17 |
 | CODE-10 | P2 | `trace_id` bound to `str(repo_path)` instead of pipeline UUID | `ai_adoption_diff/ingestion/git_reader.py:35` | Open — fix at T17/cli.py |
 | CODE-12 | P2 | `heuristic.py` missing "median commit size change" signal (spec F3 AC-2) | `ai_adoption_diff/analysis/heuristic.py:131-133` | Open — tracked |
@@ -161,6 +168,10 @@ none
 - **T09 — Churn and Rework Metrics** (2026-04-10): Added churn rate (deletions/total lines) and revert frequency (regex match fraction) metrics with frozen dataclass results and 5-test unit coverage for known values, edge cases, and regex semantics. 41 tests passing. Commits: b77c174, b127d64.
 - **T10 — Test-to-Code Ratio and Boilerplate Metrics** (2026-04-10): Added test-to-code ratio (path-based heuristic) and boilerplate signal (init/conftest/empty-commit fraction) with frozen dataclass results and 4-test unit coverage. 45 tests passing. Commits: 24c041b, 1d43596.
 - **T11 — Hot-File Instability and Directory Concentration Metrics** (2026-04-10): Added hot-file count (strict >threshold fraction) and directory concentration (top-3 dirs by line changes) with frozen dataclass results and 4-test unit coverage. 49 tests passing. Commits: 2a87f1b, 854f211.
+- **T12 — Report Model** (2026-04-10): Added Pydantic v2 AnalysisReport model aggregating all metric results, window metadata, and confidence data. 55 tests passing. Commits: 20faa6a, 3462f93.
+- **T13 — Confidence Scorer** (2026-04-10): Added confidence scorer with score/level/caveats computation, penalty model, and 5-test coverage. 60 tests passing. Commits: 27ec15d, 8e8f20f.
+- **T14 — JSON Export** (2026-04-10): Added JSON exporter writing AnalysisReport to output_dir/report.json with auto-dir creation and overwrite. 64 tests passing. Commits: 1c59e47, 4343b98.
+- **T15 — Markdown and HTML Report Renderer** (2026-04-10): Added Jinja2-based renderer with 9-metric comparison table, confidence section, footer caveat. 68 tests passing. Commits: 41ca6c9, 6718cc8.
 
 ---
 
@@ -169,6 +180,14 @@ none
 <!--
 Append phase summaries here at each phase gate.
 -->
+
+### Phase 4 — Reporting (T12–T15) — 2026-04-10
+
+Tasks: T12 (report model), T13 (confidence scorer), T14 (JSON export), T15 (Markdown/HTML renderer).
+Baseline: 51 → 68 tests.
+Fixes in cycle: none (all P1/P2 from Phase 3 already resolved).
+New open findings: none.
+Phase gate: PASS. Archived: docs/archive/PHASE4_REVIEW.md.
 
 ### Phase 3 — Metrics (T08–T11) — 2026-04-10
 
