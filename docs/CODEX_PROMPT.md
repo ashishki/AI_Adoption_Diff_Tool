@@ -18,7 +18,7 @@ Never delete history from this file. Append; do not replace.
 ## Current State
 
 - **Phase:** 1
-- **Baseline:** 26 passing tests
+- **Baseline:** 31 passing tests
 - **Ruff:** configured (ruff check passes)
 - **Last CI run:** not yet configured
 - **Last updated:** 2026-04-10
@@ -29,9 +29,9 @@ Never delete history from this file. Append; do not replace.
 
 ## Next Task
 
-**T07: Window Partitioner**
+**T08: Commit Size and Files-Touched Metrics**
 
-Read T07 in `docs/tasks.md` for the full specification, acceptance criteria, and file list.
+Read T08 in `docs/tasks.md` for the full specification, acceptance criteria, and file list.
 
 ---
 
@@ -159,6 +159,7 @@ none
 - **T04 — Git Log Ingestion** (2026-04-10): Added `CommitRecord`, git log parsing, deterministic temp git repo fixture, and ingestion coverage for commit counts, empty repos, invalid paths, and hashed author emails. 17 tests passing. Commit: pending.
 - **T05 — Adoption Anchor** (2026-04-10): Added `AnalysisWindow`, manual adoption-date validation, inclusive before/after window computation, and anchor coverage for bounds, invalid dates, empty windows, and custom window sizes. 21 tests passing. Commit: pending.
 - **T06 — Heuristic Adoption Window Inference** (2026-04-10): Added heuristic AI-config and commit-frequency signal detection, median-date inference, and confidence scoring with dedicated unit coverage. 26 tests passing. Commit: pending.
+- **T07 — Window Partitioner** (2026-04-10): Added deterministic before/after commit partitioning against `AnalysisWindow`, exclusion of out-of-window commits, adoption-date routing to `after`, and dedicated unit coverage for empty-before validation and input immutability. 31 tests passing. Commit: pending.
 
 ---
 
