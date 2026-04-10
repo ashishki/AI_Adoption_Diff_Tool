@@ -18,10 +18,10 @@ Never delete history from this file. Append; do not replace.
 ## Current State
 
 - **Phase:** 1
-- **Baseline:** 17 passing tests
+- **Baseline:** 21 passing tests
 - **Ruff:** configured (ruff check passes)
 - **Last CI run:** not yet configured
-- **Last updated:** 2026-04-09
+- **Last updated:** 2026-04-10
 - **Session tokens (approx):** not yet tracked
 - **Cumulative phase tokens (approx):** not yet tracked
 
@@ -29,9 +29,9 @@ Never delete history from this file. Append; do not replace.
 
 ## Next Task
 
-**T05: Adoption Anchor**
+**T06: Heuristic Adoption Window Inference**
 
-Read T05 in `docs/tasks.md` for the full specification, acceptance criteria, and file list.
+Read T06 in `docs/tasks.md` for the full specification, acceptance criteria, and file list.
 
 ---
 
@@ -43,8 +43,8 @@ empty (FIX-1..FIX-4 resolved 2026-04-10, commit 9cfc44f)
 
 ## Open Findings
 
-Baseline: 17 passing tests (Phase 2 ingest gate, 2026-04-10)
-Next task: T05 — Adoption Anchor
+Baseline: 21 passing tests (Phase 2 ingest gate, 2026-04-10)
+Next task: T06 — Heuristic Adoption Window Inference
 
 | ID | Sev | Description | Files | Status |
 |----|-----|-------------|-------|--------|
@@ -157,6 +157,7 @@ none
 - **T02 — CI Setup** (2026-04-09): GitHub Actions workflow, Ruff configuration, and CI validation tests. 8 tests passing. Commit: pending.
 - **T03 — Smoke Tests** (2026-04-09): Added smoke coverage for package importability, shared tracing/config surfaces, and CLI help output. 12 tests passing. Commit: pending.
 - **T04 — Git Log Ingestion** (2026-04-10): Added `CommitRecord`, git log parsing, deterministic temp git repo fixture, and ingestion coverage for commit counts, empty repos, invalid paths, and hashed author emails. 17 tests passing. Commit: pending.
+- **T05 — Adoption Anchor** (2026-04-10): Added `AnalysisWindow`, manual adoption-date validation, inclusive before/after window computation, and anchor coverage for bounds, invalid dates, empty windows, and custom window sizes. 21 tests passing. Commit: pending.
 
 ---
 
