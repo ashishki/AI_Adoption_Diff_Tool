@@ -1,159 +1,181 @@
 ---
-# ARCH_REPORT — Cycle 1
-_Date: 2026-04-09_
+# ARCH_REPORT — Cycle 2
+_Date: 2026-04-10_
 
 ## Component Verdicts
 
 | Component | Verdict | Note |
 |-----------|---------|------|
-| CLI Entry Point (`cli.py`) | PASS | Layer boundary respected; imports only `__version__` and `click`; no cross-layer violations; stub correctly wired to `cli` group via `project.scripts` |
-| Shared Config (`shared/config.py`) | PASS | Loads `AI_DIFF_LOG_LEVEL` and `AI_DIFF_OUTPUT_DIR` from env; no cross-layer imports; Pydantic BaseModel correctly used |
-| Shared Tracing (`shared/tracing.py`) | DRIFT | `get_logger` return type annotation is `FilteringBoundLogger`, not `BoundLogger`; META_ANALYSIS PROMPT_2 scope requires signature `get_logger(name: str) -> BoundLogger`; actual type differs from stated contract (see ARCH-1) |
-| Ingestion `__init__.py` | DRIFT | Empty stub; `IngestionError` not yet defined; META_ANALYSIS PROMPT_2 scope item 1 flags this as required before T04 implementation begins (see ARCH-2) |
-| Analysis `__init__.py` | DRIFT | Empty stub; `AnchorError` and `PartitionError` not yet defined; META_ANALYSIS PROMPT_2 scope item 2 flags this as required before T05/T07 (see ARCH-2) |
-| Metrics `__init__.py` | PASS | Empty stub acceptable at Phase 1; no metric modules exist yet; no violations introduced |
-| Report `__init__.py` | PASS | Empty stub acceptable at Phase 1; no report modules exist yet; no violations introduced |
-| Git Ingestion (`ingestion/git_reader.py`) | N/A | Not yet implemented; planned for T04 |
-| GitHub Remote (`ingestion/github.py`) | N/A | Not yet implemented; planned for T16 |
-| Adoption Anchor (`analysis/anchor.py`) | N/A | Not yet implemented; planned for T05 |
-| Heuristic Inference (`analysis/heuristic.py`) | N/A | Not yet implemented; planned for T06 |
-| Window Partitioner (`analysis/partitioner.py`) | N/A | Not yet implemented; planned for T07 |
-| Confidence Scorer (`analysis/confidence.py`) | N/A | Not yet implemented; planned for T07 area |
-| Commit Size Metrics (`metrics/commit_size.py`) | N/A | Not yet implemented; planned for T08 |
-| Churn Metrics (`metrics/churn.py`) | N/A | Not yet implemented; planned for T09 |
-| Test Ratio Metrics (`metrics/test_ratio.py`) | N/A | Not yet implemented; planned for T10 |
-| Hot-File Metrics (`metrics/hot_files.py`) | N/A | Not yet implemented; planned for T11 |
-| Report Model (`report/model.py`) | N/A | Not yet implemented; planned for T12 |
-| JSON Exporter (`report/json_export.py`) | N/A | Not yet implemented; planned for T13 |
-| Report Renderer (`report/renderer.py`) | N/A | Not yet implemented; planned for T14/T15 |
-
----
+| `ingestion/git_reader.py` | DRIFT | Subprocess logged at INFO not DEBUG (spec F1 AC5); `operation_name` value is `"git_reader.subprocess"` not `"git_log"` (spec F1 AC5); `trace_id` bound to `str(repo_path)` not a pipeline-level UUID |
+| `ingestion/__init__.py` | PASS | `IngestionError` defined and exported; CODE-2 resolved |
+| `analysis/anchor.py` | DRIFT | Imports `CommitRecord` directly from `ai_adoption_diff.ingestion.git_reader` sub-module instead of `ai_adoption_diff.ingestion` package boundary |
+| `analysis/heuristic.py` | VIOLATION | Missing "sudden change in median commit size" signal required by spec F3 AC2; imports `CommitRecord` from sub-module not package |
+| `analysis/partitioner.py` | VIOLATION | Does not raise `PartitionError` when `after_commits` is empty — spec F4 AC4 is unimplemented; imports from sub-modules directly |
+| `analysis/__init__.py` | PASS | `AnchorError` and `PartitionError` defined and exported; CODE-3 resolved |
+| `metrics/__init__.py` | PASS | Empty stub; ready to receive T08–T11 modules; no premature content |
+| `shared/tracing.py` | PASS | CODE-1 resolved: return type is now `BoundLogger`; inline comment marking sole permitted call site present at line 28 |
+| `shared/config.py` | DRIFT | `GITHUB_TOKEN` field absent (CODE-4, deferred to T16); PS-4 cannot be fully verified |
+| `cli.py` | DRIFT | `analyze` stub has no `@click.option` decorators (CODE-7, deferred to T17); no pipeline-level `trace_id` generated |
 
 ## Contract Compliance
 
 | Rule | Verdict | Note |
 |------|---------|------|
-| SQL Safety | PASS | No SQL in project; rule noted as N/A for v1 by contract |
-| Multi-Tenant | PASS | Single-tenant; rule not active |
-| Authorization (GITHUB_TOKEN validation before API calls) | PASS | No GitHub API calls yet; `GITHUB_TOKEN` handling not implemented; no violation introduced |
-| PII Policy (no author_email/author_name in logs at INFO+) | PASS | No PII-handling code exists yet; no violation introduced |
-| Credentials and Secrets (no secrets in source) | PASS | No credentials, tokens, or secrets found in any source file |
-| Shared Tracing Module (all logging via `get_logger`) | PASS | `tracing.py` defines `get_logger`; `cli.py` does not emit structured logs (stub only); no inline `structlog.get_logger()` calls found in individual modules |
-| CI Gate | PASS | `.github/workflows/ci.yml` verified by `test_ci.py`; test confirms checkout, Python 3.11 setup, `ruff check`, `ruff format --check`, and `pytest -q` steps are present |
-| OBS-1 (instrument every external call with operation_name, trace_id) | N/A | No external calls yet; rule will apply at T04 and T16 |
-| OBS-2 (log duration_ms and success per external call) | N/A | No external calls yet; rule will apply at T04 and T16 |
-| OBS-3 (`ai-diff --version` exits 0, prints version) | PASS | `test_version_command` in `test_skeleton.py` verifies exit 0 and version string match against `pyproject.toml` |
-| PS-1: Read-Only Repository Access | PASS | No git calls yet; no write operations introduced |
-| PS-2: Subprocess Safety (list form only) | PASS | `test_skeleton.py` and `test_ci.py` use `subprocess.run` with list form; no `shell=True` found |
-| PS-3: Determinism (no datetime.now(), no random in metric functions) | PASS | No metric functions exist yet; no violations introduced |
-| PS-4: GitHub Token Handling (loaded once in config.py) | DRIFT | `shared/config.py` does not yet load or expose `GITHUB_TOKEN`; this is not a violation now (T16 deferred) but the contract requires it be loaded exclusively in `config.py`; the field is absent (see ARCH-3) |
-| PS-5: Error Exposure (no bare tracebacks to user) | PASS | `cli.py` stub does not expose tracebacks; no error paths exist yet |
-| PS-6: Caveat Requirement (static caveat in every report) | N/A | No report modules exist yet; must be enforced at T12/T13/T14 |
-| Commit Granularity (one logical change per commit) | PASS | Phase 1 commits are split by task per available history |
-| Sandbox Isolation (tests use tmp_path, no shared mutable state) | PASS | `conftest.py` is an empty stub; no shared mutable fixtures introduced; `tmp_path` usage deferred to T04 fixture |
-
----
+| SQL Safety | PASS | No database or SQL in scope; rule noted N/A for v1 |
+| Authorization (GITHUB_TOKEN pre-call check) | N/A | GitHub module not in cycle scope |
+| PII Policy — no raw email in logs or memory | PASS | Email hashed via SHA-256 in `git_reader.py:127` immediately on parse; no raw email in any log field or data structure |
+| Credentials and Secrets | PASS | No secrets in source; no `GITHUB_TOKEN` present (CODE-4 deferred) |
+| Shared Tracing Module (sole `get_logger` call site) | PASS | CODE-1 resolved; `tracing.py:28` has required inline comment; no inline `structlog.get_logger()` calls in other modules |
+| CI Gate | N/A | CI execution state not inspected in this review |
+| OBS-1 — Instrumentation (external calls logged with `operation_name` + `trace_id`) | DRIFT | `_run_git` binds both fields but uses wrong `operation_name` value and a path string as `trace_id` instead of a pipeline UUID |
+| OBS-2 — Metrics (log `success`, `duration_ms`, `operation_name` at completion) | PASS | Both success and failure paths emit `success`, `duration_ms`, `operation_name` |
+| OBS-3 — Health check (`ai-diff --version` exits 0) | PASS | `cli.py` wires `click.version_option` with version sourced from `__version__` |
+| PS-1 — Read-only git access | PASS | Only `rev-parse` and `log` commands used; no write operations |
+| PS-2 — Subprocess list form | PASS | `_run_git` uses `["git", "-C", str(repo_path), *args]`; `shell=True` absent |
+| PS-3 — Determinism (no datetime.now/random inside metric/analysis functions) | PASS | No `datetime.now()` or `random` calls in any scoped file; `perf_counter()` in `_run_git` is for instrumentation only, not metric output |
+| PS-4 — GITHUB_TOKEN handling | DRIFT | `GITHUB_TOKEN` absent from `config.py` (CODE-4, deferred to T16); risk of incorrect loading when T16 is implemented |
+| PS-5 — Error exposure (no bare tracebacks to user) | PASS | `IngestionError` raised with message strings; no bare `except` without logging found |
+| PS-6 — Caveat requirement in reports | N/A | Report modules not yet implemented |
 
 ## ADR Compliance
 
 | ADR | Verdict | Note |
 |-----|---------|------|
-| (none) | N/A | No ADRs have been filed in `docs/adr/`. Directory exists but is empty. No decisions have been formalized yet. No violations possible; no ADR-gated features are active. |
-
----
+| (no ADRs filed) | N/A | `docs/adr/` directory is empty. No ADR-gated decisions are active. No violations possible. |
 
 ## Architecture Findings
 
-### ARCH-1 [P2] — `get_logger` return type does not match PROMPT_2 contract
+### ARCH-1 [P1] — `partition()` Does Not Raise on Empty After-Window
 
-Symptom: `shared/tracing.py` declares `get_logger(name: str) -> FilteringBoundLogger`. META_ANALYSIS PROMPT_2 scope item 4 requires the signature to be exactly `get_logger(name: str) -> BoundLogger`. Downstream T04+ tasks will rely on this signature; a type mismatch may cause type-checker failures when those tasks import and annotate against the function.
+Symptom: `partition()` raises `PartitionError` only when `before` is empty. Spec F4 AC4 and the IMPLEMENTATION_CONTRACT require the same guard for `after`.
 
-Evidence: `ai_adoption_diff/shared/tracing.py:25`
+Evidence: `ai_adoption_diff/analysis/partitioner.py:26-28` — only `if not before: raise PartitionError("before window is empty")` is present; no after-window guard exists.
 
-Root cause: `FilteringBoundLogger` is the structlog internal type returned by `structlog.make_filtering_bound_logger()`; `BoundLogger` is the public protocol type. The implementation chose the concrete internal type rather than the public protocol type.
+Root cause: Incomplete implementation of spec F4 AC4: "Given a window where `after_commits` is empty, the partitioner raises `PartitionError('after window is empty — no commits after adoption date')`."
 
-Impact: Type annotations in T04+ modules that declare `logger: BoundLogger` will be incompatible with the returned `FilteringBoundLogger` unless callers use the concrete type. Static analysis (mypy/pyright) may flag this as a type error across the codebase.
+Impact: A partition producing an empty after-window silently returns `(before, [])`. Every downstream metric will return `MetricResult(value=None, sample_size=0)` for the after window without any error, producing a report that appears valid but carries no after-window data and no user warning.
 
-Fix: Change the return annotation to `structlog.stdlib.BoundLogger` or the appropriate public protocol. Verify with `mypy` before closing.
-
----
-
-### ARCH-2 [P2] — `IngestionError`, `AnchorError`, `PartitionError` absent from package `__init__.py` files
-
-Symptom: `ai_adoption_diff/ingestion/__init__.py` and `ai_adoption_diff/analysis/__init__.py` are empty stubs. They do not declare `IngestionError`, `AnchorError`, or `PartitionError`. META_ANALYSIS PROMPT_2 scope items 1 and 2 require these exception classes to be present before T04, T05, and T07 implementation begins.
-
-Evidence: `ai_adoption_diff/ingestion/__init__.py:1`, `ai_adoption_diff/analysis/__init__.py:1`
-
-Root cause: Phase 1 tasks (T01–T03) established the directory skeleton but did not include exception class stubs in the `__init__.py` files. The spec (F1 AC-3, F4 AC-3/AC-4) defines these exceptions as the public interface of their respective packages.
-
-Impact: When Codex begins T04, it will need to define `IngestionError` somewhere. Without it pre-declared in `__init__.py`, there is a risk the exception is placed in `git_reader.py` itself and not re-exported from the package root, breaking the layered import contract (callers should import `from ai_adoption_diff.ingestion import IngestionError`, not from the implementation file).
-
-Fix: Add `class IngestionError(Exception): pass` to `ingestion/__init__.py`; add `class AnchorError(Exception): pass` and `class PartitionError(Exception): pass` to `analysis/__init__.py`. These are Phase 2 pre-conditions and should be resolved before T04 starts.
+Fix: Add `if not after: raise PartitionError("after window is empty — no commits after adoption date")` immediately after the `if not before` guard in `partition()`. Add a corresponding test.
 
 ---
 
-### ARCH-3 [P3] — `GITHUB_TOKEN` not yet represented in `shared/config.py`
+### ARCH-2 [P1] — `heuristic.py` Missing "Median Commit Size Change" Signal
 
-Symptom: `shared/config.py` defines `Config` with `log_level` and `output_dir` fields but has no `github_token` field. PS-4 requires `GITHUB_TOKEN` to be loaded exactly once in `shared/config.py`.
+Symptom: `infer_adoption()` detects only two signal types: `ai_config_file` and `commit_frequency_spike`. Spec F3 AC2 mandates a third: "sudden change in median commit size."
 
-Evidence: `ai_adoption_diff/shared/config.py:11-17`
+Evidence: `ai_adoption_diff/analysis/heuristic.py:129-140` — `signals` list assembled from `_detect_ai_config_signals()` and `_detect_commit_frequency_spike()` only; no median-commit-size change detector exists anywhere in the file.
 
-Root cause: T16 (GitHub remote support) is deferred to Phase 5. The `Config` model was not pre-stubbed with the `GITHUB_TOKEN` field.
+Root cause: T06 implementation omitted the median commit size change signal required by spec F3 AC2.
 
-Impact: Low at this phase. Risk: when T16 is implemented, `GITHUB_TOKEN` might be loaded in `ingestion/github.py` directly, violating PS-4. Having the field pre-declared in `Config` is the correct control surface.
+Impact: Heuristic inference is weaker than specified. Repos where AI adoption changed commit size but not frequency will produce zero signals and trigger the "No adoption signals detected" exit path, giving users a false negative.
 
-Fix: Add `github_token: str | None = Field(default_factory=lambda: os.getenv("GITHUB_TOKEN"))` to `Config`. Ensure the field value is never logged. Resolve before T16 begins.
-
----
-
-### ARCH-4 [P2] — `analyze` command stub lacks required flags; extension path not structurally verified
-
-Symptom: `cli.py` defines `analyze()` with no parameters. META_ANALYSIS PROMPT_2 scope item 5 requires the stub to "support extension to `ai-diff analyze` with `--repo`, `--date`, `--tool`, `--format` flags in T17 without rewrite." The current stub has no `@click.option` decorators and no parameter signature.
-
-Evidence: `ai_adoption_diff/cli.py:17-19`
-
-Root cause: Phase 1 stub was intentionally minimal. However, without at least the Click parameter declarations in place, T17 will require structural changes to the function signature rather than additive decoration, which increases regression risk.
-
-Impact: T17 implementation will need to modify the function signature and add decorators. This is normal extension but the stub's complete absence of parameters means no contract exists to validate against during the Phase 2–4 cycles.
-
-Fix: This is a deferred concern for T17. No structural violation has occurred yet. Mark as watch item; verify at T17 that the stub was extended additively without rewriting existing tests.
+Fix: Implement `_detect_median_commit_size_change()` that computes rolling median `insertions + deletions` and emits `Signal(signal_name="median_commit_size_change", ...)` when the change exceeds a threshold. Add it to the `signals` aggregation in `infer_adoption()`. Add corresponding tests.
 
 ---
 
-### ARCH-5 [P3] — `pyproject.toml` targets Python 3.11 in ruff but `requires-python = ">=3.10"`
+### ARCH-3 [P2] — Subprocess Logging Level Is INFO Instead of DEBUG
 
-Symptom: `pyproject.toml` sets `requires-python = ">=3.10"` but `[tool.ruff] target-version = "py311"`. This mismatch means ruff will lint for Python 3.11 syntax features but the package declares support for 3.10+.
+Symptom: `_run_git()` calls `logger.info(...)` for both success and failure paths. Spec F1 AC5 requires DEBUG level: "All `git` subprocess calls are logged at DEBUG level."
 
-Evidence: `pyproject.toml:8` (`requires-python = ">=3.10"`), `pyproject.toml:29` (`target-version = "py311"`)
+Evidence: `ai_adoption_diff/ingestion/git_reader.py:47` — `logger.info("git subprocess failed", ...)` and `ai_adoption_diff/ingestion/git_reader.py:56` — `logger.info("git subprocess completed", ...)`.
 
-Root cause: ARCHITECTURE.md §Tech Stack specifies Python 3.11 as the language choice; `requires-python` was set conservatively to 3.10. The two settings are inconsistent.
+Root cause: Implementation chose INFO; spec mandates DEBUG.
 
-Impact: Low; no current code uses 3.11-only syntax. Risk: as T04+ code is written, ruff may permit 3.11-only syntax that will fail on 3.10 installations.
+Impact: With default `AI_DIFF_LOG_LEVEL=INFO`, every git invocation produces a visible log line. For large histories this is noisy and violates the spec contract.
 
-Fix: Align to `requires-python = ">=3.11"` to match ARCHITECTURE.md and ruff config, or change `target-version` to `py310`. Recommended: align to `>=3.11` to match the architecture specification.
+Fix: Change both `logger.info(...)` calls in `_run_git()` to `logger.debug(...)`.
 
 ---
+
+### ARCH-4 [P2] — `operation_name` Value Mismatch with Spec
+
+Symptom: `_run_git()` binds `operation_name="git_reader.subprocess"`. Spec F1 AC5 specifies the value must be `"git_log"`.
+
+Evidence: `ai_adoption_diff/ingestion/git_reader.py:34`.
+
+Root cause: Implementation chose a descriptive but non-conformant name.
+
+Impact: Any log query filtering by `operation_name="git_log"` (as specified) will miss these events. OBS-1 compliance is nominally broken.
+
+Fix: Change the constant on line 34 from `"git_reader.subprocess"` to `"git_log"`.
+
+---
+
+### ARCH-5 [P2] — `trace_id` Bound to `str(repo_path)` Instead of a Pipeline-Level UUID
+
+Symptom: `_run_git()` binds `trace_id=str(repo_path)`. The architecture and contract specify `trace_id` as a per-pipeline-run identifier correlating all log events within a single CLI invocation.
+
+Evidence: `ai_adoption_diff/ingestion/git_reader.py:35`.
+
+Root cause: No pipeline-level `trace_id` is generated in `cli.py` and propagated down. `git_reader.py` substitutes `repo_path` as a workaround.
+
+Impact: Log correlation across pipeline stages is broken. Events from `anchor.py`, `partitioner.py`, and future metric modules cannot be joined by `trace_id`. Multiple sequential runs against different repos produce changing `trace_id` values mid-run.
+
+Fix: Generate a UUID4 string at the start of each `analyze` invocation in `cli.py` and pass it into the pipeline. `_run_git()` should accept `trace_id` as a parameter or read it from a structlog context variable bound at CLI entry.
+
+---
+
+### ARCH-6 [P2] — Cross-Layer Direct Sub-Module Imports in `analysis/`
+
+Symptom: `anchor.py`, `heuristic.py`, and `partitioner.py` all import `CommitRecord` directly from `ai_adoption_diff.ingestion.git_reader` (implementation sub-module) instead of `ai_adoption_diff.ingestion` (package boundary).
+
+Evidence:
+- `ai_adoption_diff/analysis/anchor.py:9`: `from ai_adoption_diff.ingestion.git_reader import CommitRecord`
+- `ai_adoption_diff/analysis/heuristic.py:10`: `from ai_adoption_diff.ingestion.git_reader import CommitRecord`
+- `ai_adoption_diff/analysis/partitioner.py:7`: `from ai_adoption_diff.ingestion.git_reader import CommitRecord`
+
+Root cause: `CommitRecord` is not re-exported from `ai_adoption_diff/ingestion/__init__.py`, so consumers reach through to the implementation module.
+
+Impact: If `CommitRecord` moves or the ingestion module is split, all three analysis files break simultaneously. The ingestion package boundary is bypassed, violating the layered import contract that callers import from the package `__init__`, not from internal modules.
+
+Fix: Add `from ai_adoption_diff.ingestion.git_reader import CommitRecord` to `ai_adoption_diff/ingestion/__init__.py` as a re-export. Update all three analysis files to `from ai_adoption_diff.ingestion import CommitRecord`. This mirrors the existing `IngestionError` pattern.
+
+---
+
+### ARCH-7 [P3] — CODE-4 Still Open: `GITHUB_TOKEN` Absent from `config.py`
+
+Symptom: `shared/config.py` `Config` model has `log_level` and `output_dir` only. No `github_token` field.
+
+Evidence: `ai_adoption_diff/shared/config.py:11-17`.
+
+Root cause: Deferred to T16 per META_ANALYSIS. Carried from Cycle 1.
+
+Impact: PS-4 cannot be verified as satisfied. Risk: when T16 is implemented, the token may be loaded outside `config.py`, violating the single-load-site contract.
+
+Fix: Add `github_token: str | None = Field(default_factory=lambda: os.getenv("GITHUB_TOKEN"))` to `Config` before T16 begins. Ensure the field value is never passed to any logger.
+
+---
+
+### ARCH-8 [P3] — CODE-5 Still Open: Python Version Inconsistency
+
+Symptom: `pyproject.toml` declares `requires-python = ">=3.10"` but ruff uses `target-version = "py311"`. Architecture specifies Python 3.11.
+
+Evidence: `pyproject.toml:10` and `pyproject.toml:29`.
+
+Root cause: Carried from Cycle 1; not resolved during Phase 2.
+
+Impact: Users on Python 3.10 can install the package, but ruff permits 3.11-only syntax that will fail on such installations. False compatibility signal.
+
+Fix: Change `requires-python` to `">=3.11"` to align with ARCHITECTURE.md tech stack choice and ruff target.
 
 ## Right-Sizing / Runtime Checks
 
 | Check | Verdict | Note |
 |-------|---------|------|
-| Solution shape still Deterministic subsystem | PASS | No LLM calls, no agent loops, no ML inference introduced; pipeline is fixed-stage (ingest → anchor → partition → compute → report) as specified |
-| Metric functions are pure/deterministic | PASS | No metric modules exist yet; no `datetime.now()`, `random`, or external state reads found in any existing code |
-| T0 runtime preserved (no DB/worker/mutable state) | PASS | No database, no background worker, no persistent state beyond output files; `Config.output_dir` is a local path only |
-| Read-only git enforcement holds | PASS | No git subprocess calls exist yet; no write-mode git operations introduced |
-| Subprocess list-form used everywhere | PASS | All subprocess calls in test files use list form (`["ruff", "check", ...]`, `[ai_diff_bin, "--version"]`); no `shell=True` found |
-| No LLM calls without ADR | CLEAN | No LLM calls anywhere in the codebase; Capability Profiles remain all OFF |
-
----
+| Solution shape still Deterministic subsystem | PASS | No LLM calls, no external model inference, no agent loops introduced in T04–T07 |
+| Metric functions are pure/deterministic | PASS | No metric functions implemented yet; all analysis code uses standard library, date arithmetic, sorted inputs, and statistics — no `datetime.now()`, `random`, or external state reads |
+| T0 runtime preserved (no DB/worker/mutable state) | PASS | No database, no background workers, no persistent runtime state; outputs are local files only |
+| Read-only git enforcement holds | PASS | `_run_git()` called only with `rev-parse` and `log`; no write-capable git commands present |
+| Subprocess list-form used everywhere | PASS | `subprocess.run(["git", "-C", str(repo_path), *args], ...)` — list form; `shell=True` absent |
+| No LLM calls without ADR | CLEAN | No LLM calls, tool schemas, or agent loops in any scoped file; all Capability Profiles remain OFF |
 
 ## Doc Patches Needed
 
 | File | Section | Change |
 |------|---------|--------|
-| `docs/ARCHITECTURE.md` | §Component Table | `Confidence Scorer` is listed as `ai_adoption_diff/analysis/confidence.py` but is absent from the file layout diagram — layout shows only `anchor.py`, `heuristic.py`, `partitioner.py`. Add `confidence.py` to the layout tree. |
-| `docs/ARCHITECTURE.md` | §File Layout | `docs/adr/` is shown as an empty directory in the layout — this is accurate but should include a placeholder note that ADRs will live here as `ADR{NNN}.md` per IMPLEMENTATION_CONTRACT.md governance. |
-| `docs/CODEX_PROMPT.md` | Pending commits section | META_ANALYSIS F-04: T02 and T03 are listed as "pending" despite being complete. Update to reflect Phase 1 completion state. Cosmetic; no functional impact. |
-| `docs/prompts/ORCHESTRATOR.md` | Entire file | META_ANALYSIS F-03: `{{PROJECT_ROOT}}` and `{{CODEX_COMMAND}}` placeholders remain unresolved. Must be filled before the first orchestrator loop is started. |
+| `docs/ARCHITECTURE.md` | Component Table | Add note that `CommitRecord` must be re-exported from `ingestion/__init__.py` to enforce the package boundary (prerequisite for closing ARCH-6) |
+| `docs/ARCHITECTURE.md` | Observability Invariants | Add: "All git subprocess calls logged at DEBUG level with `operation_name='git_log'`" (currently implied by spec F1 AC5 but not stated in ARCHITECTURE.md) |
+| `docs/adr/` | (new file needed) | No ADRs have been filed. Any approved deviation from the IMPLEMENTATION_CONTRACT (e.g., deferred `CommitRecord` re-export) must be recorded as `ADR-001` before it can be accepted as a formal exception rather than an open finding. |
+| `docs/CODEX_PROMPT.md` | Open findings table | Close CODE-1, CODE-2, CODE-3 as resolved. Update CODE-6 status to resolved (inline comment now present). Keep CODE-4, CODE-5, CODE-7 as open. |
 
 ---
