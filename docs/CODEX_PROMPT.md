@@ -1,8 +1,8 @@
 # CODEX_PROMPT.md
 
-Version: 1.2
+Version: 1.3
 Date: 2026-04-10
-Phase: 2
+Phase: 4
 
 <!--
 This file is the single source of truth for session state.
@@ -17,8 +17,8 @@ Never delete history from this file. Append; do not replace.
 
 ## Current State
 
-- **Phase:** 3
-- **Baseline:** 41 passing tests
+- **Phase:** 4
+- **Baseline:** 51 passing tests
 - **Ruff:** configured (ruff check passes)
 - **Last CI run:** not yet configured
 - **Last updated:** 2026-04-10
@@ -29,53 +29,34 @@ Never delete history from this file. Append; do not replace.
 
 ## Next Task
 
-**T10: Test-to-Code Ratio and Boilerplate Metrics**
+**T12: Report Model**
 
-Read T10 in `docs/tasks.md` for the full specification, acceptance criteria, and file list.
+Read T12 in `docs/tasks.md` for the full specification, acceptance criteria, and file list.
 
 ---
 
 ## Fix Queue
 
-empty (CODE-8..13 resolved 2026-04-10, commit 3fd42b1; CODE-10 deferred — trace_id UUID threaded at T17/cli.py)
-
-─── Pre-T16/Pre-Phase-5 Fix Queue (age cap approaching — escalates to P1 at Cycle 3) ─────
-
-🟡 CODE-16 [P3, age 2/3] — GITHUB_TOKEN absent from config.py — resolve before T16
-  File: ai_adoption_diff/shared/config.py · Change: add `github_token: str | None = Field(default_factory=lambda: os.getenv("GITHUB_TOKEN"))` to `Config`; ensure field value is never passed to any logger · Test: unit test asserts `Config().github_token` reads from env and is absent from all log output
-
-🟡 CODE-17 [P3, age 2/3] — Python version inconsistency in pyproject.toml — resolve before Phase 5
-  File: pyproject.toml:10,29 · Change: set `requires-python = ">=3.11"` to align with ruff `target-version = "py311"` and ARCHITECTURE.md · Test: `pip install -e .` succeeds on Python 3.11; ruff check passes
+empty (CODE-8..13 resolved 2026-04-10, commit 3fd42b1; CODE-10 deferred — trace_id UUID threaded at T17/cli.py; CODE-16/17 resolved 2026-04-10 commits ac0b90a/fc90e55)
 
 ---
 
 ## Open Findings
 
-Baseline: 36 passing tests (post-T08, 2026-04-10)
-Next task: T09 — Churn and Rework Metrics
+Baseline: 51 passing tests (post-Phase-3 deep review, 2026-04-10)
+Next task: T12 — Report Model
 
 | ID | Sev | Description | Files | Status |
 |----|-----|-------------|-------|--------|
-| CODE-1 | P2 | `get_logger` return type was `FilteringBoundLogger`; must be `BoundLogger` | `ai_adoption_diff/shared/tracing.py:25` | **Closed** — resolved in T04–T07; verified 2026-04-10 |
-| CODE-2 | P2 | `IngestionError` absent from `ingestion/__init__.py` | `ai_adoption_diff/ingestion/__init__.py` | **Closed** — `IngestionError` exported at package level; verified 2026-04-10 |
-| CODE-3 | P2 | `AnchorError` and `PartitionError` absent from `analysis/__init__.py` | `ai_adoption_diff/analysis/__init__.py` | **Closed** — both exported at package level; verified 2026-04-10 |
-| CODE-6 | P2 | `tracing.py::get_logger` missing inline comment for sole permitted call site | `ai_adoption_diff/shared/tracing.py:28` | **Closed** — inline comment present; verified 2026-04-10 |
 | CODE-7 | P2 | `analyze` stub lacks `@click.option` for T17 flags | `ai_adoption_diff/cli.py:17-19` | Watch — deferred to T17 |
-| CODE-8 | P2 | Git subprocess calls logged at INFO; spec F1 AC-5 requires DEBUG | `ai_adoption_diff/ingestion/git_reader.py:47,56` | Open — fix before Phase 3 |
-| CODE-9 | P2 | `operation_name` is `"git_reader.subprocess"` not spec-required `"git_log"` | `ai_adoption_diff/ingestion/git_reader.py:34` | Open — fix before Phase 3 |
-| CODE-10 | P2 | `trace_id` bound to `str(repo_path)` instead of pipeline UUID | `ai_adoption_diff/ingestion/git_reader.py:35` | Open — fix before Phase 3 |
-| CODE-11 | P2 | `partition()` does not raise `PartitionError` on empty after-window (spec F4 AC-4) | `ai_adoption_diff/analysis/partitioner.py:26-28` | Open — fix before Phase 3 |
-| CODE-12 | P2 | `heuristic.py` missing "median commit size change" signal (spec F3 AC-2) | `ai_adoption_diff/analysis/heuristic.py:131-133` | Open — fix before Phase 3 |
-| CODE-13 | P2 | `analysis/` modules import `CommitRecord` from sub-module, bypassing package boundary | `anchor.py:9`, `heuristic.py:10`, `partitioner.py:7` | Open — fix before Phase 3 |
-| CODE-14 | P2 | Integration test suite missing invalid-path error propagation test | `tests/integration/test_git_reader.py` | Open — fix before Phase 3 |
+| CODE-10 | P2 | `trace_id` bound to `str(repo_path)` instead of pipeline UUID | `ai_adoption_diff/ingestion/git_reader.py:35` | Open — fix at T17/cli.py |
+| CODE-12 | P2 | `heuristic.py` missing "median commit size change" signal (spec F3 AC-2) | `ai_adoption_diff/analysis/heuristic.py:131-133` | Open — tracked |
 | CODE-15 | P3 | `tmp_git_repo` fixture: 5 commits / 5 days; T17 needs ≥20 / ≥6 months | `tests/conftest.py:31-37` | Open — fix before T17 |
-| CODE-16 | P3 | `GITHUB_TOKEN` absent from `config.py`; **age cap approaching (2/3)** | `ai_adoption_diff/shared/config.py` | Open — fix before T16; escalates to P1 at Cycle 3 |
-| CODE-17 | P3 | `requires-python = ">=3.10"` vs ruff `target-version = "py311"`; **age cap approaching (2/3)** | `pyproject.toml:10,29` | Open — fix before Phase 5; escalates to P1 at Cycle 3 |
-| F-01 | INFO | T10/T11 dependency on `CommitRecord.file_paths` | `ai_adoption_diff/ingestion/git_reader.py` | **Closed** — `file_paths` confirmed present; 2026-04-10 |
+| CODE-16 | P3 | `GITHUB_TOKEN` absent from `config.py` | `ai_adoption_diff/shared/config.py` | **Closed** — commit ac0b90a; tests 550573b; 2026-04-10 |
+| CODE-17 | P3 | `requires-python = ">=3.10"` vs ruff `target-version = "py311"` | `pyproject.toml:10,29` | **Closed** — commit fc90e55; 2026-04-10 |
+| CODE-18 | P3 | Return-type inconsistency: hot_files returns bare `None` vs wrapped dataclass (T09/T10 pattern) | `ai_adoption_diff/metrics/hot_files.py:39-40,58-59` | Open — fix before Phase 5 |
 | F-02 | INFO | T16 token-not-logged and cleanup-on-error are mandatory evidence tests | `ai_adoption_diff/ingestion/github.py` | Deferred — Phase 5 |
 | F-03 | INFO | `docs/prompts/ORCHESTRATOR.md` has unresolved `{{PROJECT_ROOT}}` and `{{CODEX_COMMAND}}` placeholders | `docs/prompts/ORCHESTRATOR.md` | Open — manual action required |
-| F-04 | INFO | T02 and T03 listed as "pending" in Completed Tasks | `docs/CODEX_PROMPT.md` | **Closed (cosmetic)** — no functional impact; 2026-04-10 |
-| F-05 | INFO | T04 provides `CommitRecord.file_paths`; T10/T11 dependency satisfied | `ai_adoption_diff/ingestion/git_reader.py` | **Closed** — 2026-04-10 |
 
 ---
 
@@ -178,6 +159,8 @@ none
 - **T07 — Window Partitioner** (2026-04-10): Added deterministic before/after commit partitioning against `AnalysisWindow`, exclusion of out-of-window commits, adoption-date routing to `after`, and dedicated unit coverage for empty-before validation and input immutability. 31 tests passing. Commit: pending.
 - **T08 — Commit Size and Files-Touched Metrics** (2026-04-10): Added deterministic commit-size and files-touched summary metrics with manual p90 interpolation and dedicated unit coverage for fixture arithmetic, empty input, determinism, and known percentile behavior. 36 tests passing. Commits: 4af2283, ee4e798.
 - **T09 — Churn and Rework Metrics** (2026-04-10): Added churn rate (deletions/total lines) and revert frequency (regex match fraction) metrics with frozen dataclass results and 5-test unit coverage for known values, edge cases, and regex semantics. 41 tests passing. Commits: b77c174, b127d64.
+- **T10 — Test-to-Code Ratio and Boilerplate Metrics** (2026-04-10): Added test-to-code ratio (path-based heuristic) and boilerplate signal (init/conftest/empty-commit fraction) with frozen dataclass results and 4-test unit coverage. 45 tests passing. Commits: 24c041b, 1d43596.
+- **T11 — Hot-File Instability and Directory Concentration Metrics** (2026-04-10): Added hot-file count (strict >threshold fraction) and directory concentration (top-3 dirs by line changes) with frozen dataclass results and 4-test unit coverage. 49 tests passing. Commits: 2a87f1b, 854f211.
 
 ---
 
@@ -186,6 +169,14 @@ none
 <!--
 Append phase summaries here at each phase gate.
 -->
+
+### Phase 3 — Metrics (T08–T11) — 2026-04-10
+
+Tasks: T08 (commit size/files-touched), T09 (churn/revert), T10 (test ratio/boilerplate), T11 (hot-files/dir concentration).
+Baseline: 36 → 51 tests (post CODE-16 fix tests).
+Fixes in cycle: CODE-16 (GITHUB_TOKEN, escalated P1), CODE-17 (requires-python mismatch, escalated P1).
+New open findings: CODE-18 (P3, return-type inconsistency in hot_files).
+Phase gate: PASS. Archived: docs/archive/PHASE3_REVIEW.md.
 
 ---
 
