@@ -18,7 +18,7 @@ Never delete history from this file. Append; do not replace.
 ## Current State
 
 - **Phase:** 1
-- **Baseline:** 12 passing tests
+- **Baseline:** 17 passing tests
 - **Ruff:** configured (ruff check passes)
 - **Last CI run:** not yet configured
 - **Last updated:** 2026-04-09
@@ -29,33 +29,22 @@ Never delete history from this file. Append; do not replace.
 
 ## Next Task
 
-**T04: Git Log Ingestion**
+**T05: Adoption Anchor**
 
-Read T04 in `docs/tasks.md` for the full specification, acceptance criteria, and file list.
+Read T05 in `docs/tasks.md` for the full specification, acceptance criteria, and file list.
 
 ---
 
 ## Fix Queue
 
-─── Fix Queue (resolve before T04 queue) ────────────────────────
-🟠 FIX-1 [P2] — Change `get_logger` return annotation to public protocol type
-  File: ai_adoption_diff/shared/tracing.py:25 · Change: replace `-> FilteringBoundLogger` with `-> structlog.stdlib.BoundLogger` (or equivalent public protocol) · Test: run mypy/pyright; verify no type error when caller annotates `logger: BoundLogger`
-
-🟠 FIX-2 [P2] — Add `IngestionError` to `ingestion/__init__.py`
-  File: ai_adoption_diff/ingestion/__init__.py:1 · Change: add `class IngestionError(Exception): pass` · Test: `from ai_adoption_diff.ingestion import IngestionError` succeeds in a unit test
-
-🟠 FIX-3 [P2] — Add `AnchorError` and `PartitionError` to `analysis/__init__.py`
-  File: ai_adoption_diff/analysis/__init__.py:1 · Change: add `class AnchorError(Exception): pass` and `class PartitionError(Exception): pass` · Test: `from ai_adoption_diff.analysis import AnchorError, PartitionError` succeeds in a unit test
-
-🟠 FIX-4 [P2] — Add inline comment in `tracing.py` marking sole permitted `structlog.get_logger()` call site
-  File: ai_adoption_diff/shared/tracing.py:28 · Change: add comment `# sole permitted structlog.get_logger() call — do not call structlog.get_logger() directly in other modules` · Test: no code change; verify comment present in code review
+empty (FIX-1..FIX-4 resolved 2026-04-10, commit 9cfc44f)
 
 ---
 
 ## Open Findings
 
-Baseline: 12 passing tests (Phase 1 gate, 2026-04-10)
-Next task: T04 — Git Log Ingestion (resolve Fix Queue items FIX-1 through FIX-4 first)
+Baseline: 17 passing tests (Phase 2 ingest gate, 2026-04-10)
+Next task: T05 — Adoption Anchor
 
 | ID | Sev | Description | Files | Status |
 |----|-----|-------------|-------|--------|
@@ -70,6 +59,7 @@ Next task: T04 — Git Log Ingestion (resolve Fix Queue items FIX-1 through FIX-
 | F-02 | INFO | T16 token-not-logged and cleanup-on-error are mandatory evidence tests | `ai_adoption_diff/ingestion/github.py` (T16) | Deferred — Phase 5 |
 | F-03 | INFO | `docs/prompts/ORCHESTRATOR.md` has unresolved `{{PROJECT_ROOT}}` and `{{CODEX_COMMAND}}` placeholders | `docs/prompts/ORCHESTRATOR.md` | Open — manual action required |
 | F-04 | INFO | T02 and T03 commits listed as "pending" in Completed Tasks despite being complete | `docs/CODEX_PROMPT.md` | Open — cosmetic |
+| F-05 | INFO | T04 provides `CommitRecord.file_paths`; T10/T11 dependency satisfied | `ai_adoption_diff/ingestion/git_reader.py` | Resolved — 2026-04-10 |
 
 ---
 
@@ -166,6 +156,7 @@ none
 - **T01 — Project Skeleton** (2026-04-09): Package structure, CLI stub, shared config and tracing modules. 4 tests passing. Commit: d08cc4b.
 - **T02 — CI Setup** (2026-04-09): GitHub Actions workflow, Ruff configuration, and CI validation tests. 8 tests passing. Commit: pending.
 - **T03 — Smoke Tests** (2026-04-09): Added smoke coverage for package importability, shared tracing/config surfaces, and CLI help output. 12 tests passing. Commit: pending.
+- **T04 — Git Log Ingestion** (2026-04-10): Added `CommitRecord`, git log parsing, deterministic temp git repo fixture, and ingestion coverage for commit counts, empty repos, invalid paths, and hashed author emails. 17 tests passing. Commit: pending.
 
 ---
 
