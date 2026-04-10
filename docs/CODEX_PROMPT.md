@@ -18,7 +18,7 @@ Never delete history from this file. Append; do not replace.
 ## Current State
 
 - **Phase:** 2
-- **Baseline:** 31 passing tests
+- **Baseline:** 32 passing tests
 - **Ruff:** configured (ruff check passes)
 - **Last CI run:** not yet configured
 - **Last updated:** 2026-04-10
@@ -37,25 +37,7 @@ Read T08 in `docs/tasks.md` for the full specification, acceptance criteria, and
 
 ## Fix Queue
 
-─── Fix Queue (resolve before Phase 3 queue begins) ────────────────────────
-
-🟠 CODE-8 [P2] — Git subprocess logged at INFO not DEBUG
-  File: ai_adoption_diff/ingestion/git_reader.py:47,56 · Change: change both `logger.info(...)` calls in `_run_git()` to `logger.debug(...)` · Test: assert log level is DEBUG for a successful and failed git call
-
-🟠 CODE-9 [P2] — operation_name value is "git_reader.subprocess" not "git_log"
-  File: ai_adoption_diff/ingestion/git_reader.py:34 · Change: replace the string literal `"git_reader.subprocess"` with `"git_log"` · Test: assert log record contains `operation_name="git_log"`
-
-🟠 CODE-10 [P2] — trace_id bound to str(repo_path) not pipeline UUID
-  File: ai_adoption_diff/ingestion/git_reader.py:35 · Change: generate a UUID4 in `cli.py` at the start of each `analyze` invocation and thread it into `_run_git()` (via parameter or structlog context bind) · Test: assert `trace_id` is a valid UUID4 string in captured log output
-
-🟠 CODE-11 [P2] — partition() does not raise on empty after-window
-  File: ai_adoption_diff/analysis/partitioner.py:26-28 · Change: add `if not after: raise PartitionError("after window is empty — no commits after adoption date")` immediately after the `if not before` guard · Test: add `test_empty_after_raises_partition_error` to `tests/unit/test_partitioner.py`
-
-🟠 CODE-12 [P2] — heuristic.py missing median-commit-size-change signal
-  File: ai_adoption_diff/analysis/heuristic.py:131-133 · Change: implement `_detect_median_commit_size_change()` computing rolling median of `insertions + deletions` and emitting `Signal(signal_name="median_commit_size_change", ...)` when change exceeds threshold; add to `signals` aggregation in `infer_adoption()` · Test: add test with commits showing large median size shift to `tests/unit/test_heuristic.py`
-
-🟠 CODE-13 [P2] — Cross-layer direct sub-module imports for CommitRecord
-  File: ai_adoption_diff/analysis/anchor.py:9, heuristic.py:10, partitioner.py:7 · Change: re-export `CommitRecord` from `ai_adoption_diff/ingestion/__init__.py`; update all three analysis files to `from ai_adoption_diff.ingestion import CommitRecord` · Test: ruff import-order check passes; existing tests continue to pass
+empty (CODE-8..13 resolved 2026-04-10, commit 3fd42b1; CODE-10 deferred — trace_id UUID threaded at T17/cli.py)
 
 ─── Pre-T16/Pre-Phase-5 Fix Queue (age cap approaching — escalates to P1 at Cycle 3) ─────
 
