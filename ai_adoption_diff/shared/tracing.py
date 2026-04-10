@@ -5,7 +5,7 @@ from __future__ import annotations
 from functools import lru_cache
 
 import structlog
-from structlog.typing import FilteringBoundLogger
+from structlog.stdlib import BoundLogger
 
 
 @lru_cache(maxsize=1)
@@ -22,7 +22,8 @@ def _configure_structlog() -> None:
     )
 
 
-def get_logger(name: str) -> FilteringBoundLogger:
+def get_logger(name: str) -> BoundLogger:
     """Return a shared structured logger for the given component name."""
     _configure_structlog()
+    # sole permitted structlog.get_logger() call — do not call structlog.get_logger() directly in other modules
     return structlog.get_logger(name).bind(trace_id=None, operation_name=None)
