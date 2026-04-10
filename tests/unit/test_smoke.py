@@ -34,6 +34,35 @@ def test_config_loads(monkeypatch) -> None:
     assert config is not None
 
 
+def test_config_github_token_reads_env(monkeypatch) -> None:
+    monkeypatch.setenv("GITHUB_TOKEN", "test-secret-token")
+
+    from importlib import reload
+    import ai_adoption_diff.shared.config as cfg_module
+
+    reload(cfg_module)
+    config = cfg_module.Config()
+
+    assert config.github_token == "test-secret-token"
+
+
+def test_config_github_token_absent_from_logs(monkeypatch, caplog) -> None:
+    import logging
+
+    monkeypatch.setenv("GITHUB_TOKEN", "should-not-appear-in-logs")
+
+    from importlib import reload
+    import ai_adoption_diff.shared.config as cfg_module
+
+    reload(cfg_module)
+
+    with caplog.at_level(logging.DEBUG):
+        cfg_module.Config()
+
+    for record in caplog.records:
+        assert "should-not-appear-in-logs" not in record.getMessage()
+
+
 def test_cli_help_exits_zero() -> None:
     runner = CliRunner()
 
