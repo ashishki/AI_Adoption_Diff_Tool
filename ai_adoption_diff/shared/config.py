@@ -15,3 +15,5 @@ class Config(BaseModel):
     output_dir: Path = Field(
         default_factory=lambda: Path(os.getenv("AI_DIFF_OUTPUT_DIR", "./output"))
     )
+    # GITHUB_TOKEN is read here and never passed to any logger.
+    github_token: str | None = Field(default_factory=lambda: os.getenv("GITHUB_TOKEN"))
