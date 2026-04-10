@@ -1,7 +1,7 @@
 # CODEX_PROMPT.md
 
-Version: 1.0
-Date: 2026-04-07
+Version: 1.1
+Date: 2026-04-10
 Phase: 1
 
 <!--
@@ -37,13 +37,39 @@ Read T04 in `docs/tasks.md` for the full specification, acceptance criteria, and
 
 ## Fix Queue
 
-empty
+─── Fix Queue (resolve before T04 queue) ────────────────────────
+🟠 FIX-1 [P2] — Change `get_logger` return annotation to public protocol type
+  File: ai_adoption_diff/shared/tracing.py:25 · Change: replace `-> FilteringBoundLogger` with `-> structlog.stdlib.BoundLogger` (or equivalent public protocol) · Test: run mypy/pyright; verify no type error when caller annotates `logger: BoundLogger`
+
+🟠 FIX-2 [P2] — Add `IngestionError` to `ingestion/__init__.py`
+  File: ai_adoption_diff/ingestion/__init__.py:1 · Change: add `class IngestionError(Exception): pass` · Test: `from ai_adoption_diff.ingestion import IngestionError` succeeds in a unit test
+
+🟠 FIX-3 [P2] — Add `AnchorError` and `PartitionError` to `analysis/__init__.py`
+  File: ai_adoption_diff/analysis/__init__.py:1 · Change: add `class AnchorError(Exception): pass` and `class PartitionError(Exception): pass` · Test: `from ai_adoption_diff.analysis import AnchorError, PartitionError` succeeds in a unit test
+
+🟠 FIX-4 [P2] — Add inline comment in `tracing.py` marking sole permitted `structlog.get_logger()` call site
+  File: ai_adoption_diff/shared/tracing.py:28 · Change: add comment `# sole permitted structlog.get_logger() call — do not call structlog.get_logger() directly in other modules` · Test: no code change; verify comment present in code review
 
 ---
 
 ## Open Findings
 
-none
+Baseline: 12 passing tests (Phase 1 gate, 2026-04-10)
+Next task: T04 — Git Log Ingestion (resolve Fix Queue items FIX-1 through FIX-4 first)
+
+| ID | Sev | Description | Files | Status |
+|----|-----|-------------|-------|--------|
+| CODE-1 | P2 | `get_logger` return type is `FilteringBoundLogger` (internal concrete type); must be `BoundLogger` (public protocol) | `ai_adoption_diff/shared/tracing.py:25` | Open — fix before T04 |
+| CODE-2 | P2 | `IngestionError` absent from `ingestion/__init__.py`; layered import contract broken for T04 | `ai_adoption_diff/ingestion/__init__.py:1` | Open — fix before T04 |
+| CODE-3 | P2 | `AnchorError` and `PartitionError` absent from `analysis/__init__.py`; layered import contract broken for T05/T07 | `ai_adoption_diff/analysis/__init__.py:1` | Open — fix before T05 |
+| CODE-4 | P3 | `GITHUB_TOKEN` field absent from `shared/config.py`; PS-4 requires it to be loaded exclusively there | `ai_adoption_diff/shared/config.py:11-17` | Open — pre-stub before T16 |
+| CODE-5 | P3 | `pyproject.toml` `requires-python = ">=3.10"` but ruff `target-version = "py311"`; inconsistent | `pyproject.toml:8,29` | Open — align to `>=3.11` |
+| CODE-6 | P2 | `tracing.py::get_logger` calls `structlog.get_logger()` without a comment marking it as the sole permitted call site | `ai_adoption_diff/shared/tracing.py:28` | Open — add inline comment |
+| CODE-7 | P2 | `analyze` stub lacks `@click.option` for T17 flags; T17 will need additive signature changes | `ai_adoption_diff/cli.py:17-19` | Watch — deferred to T17 |
+| F-01 | INFO | T10/T11 depend on `CommitRecord.file_paths` from T04; if absent Codex must stop and report BLOCKED | `ai_adoption_diff/ingestion/git_reader.py` (T04) | Watch — verify at T04 completion |
+| F-02 | INFO | T16 token-not-logged and cleanup-on-error are mandatory evidence tests | `ai_adoption_diff/ingestion/github.py` (T16) | Deferred — Phase 5 |
+| F-03 | INFO | `docs/prompts/ORCHESTRATOR.md` has unresolved `{{PROJECT_ROOT}}` and `{{CODEX_COMMAND}}` placeholders | `docs/prompts/ORCHESTRATOR.md` | Open — manual action required |
+| F-04 | INFO | T02 and T03 commits listed as "pending" in Completed Tasks despite being complete | `docs/CODEX_PROMPT.md` | Open — cosmetic |
 
 ---
 
