@@ -1,0 +1,36 @@
+# Analysis Report
+
+## Summary
+
+- Repo Path: `{{ report.repo_path }}`
+- Tool Label: `{{ report.tool_label }}`
+- Adoption Date: `{{ report.adoption_date }}`
+- Window Days: `{{ report.window_days }}`
+
+## Confidence
+
+- Score: {{ format_value(report.confidence.score) }}
+- Level: {{ report.confidence.level or 'N/A' }}
+- Anchor Source: {{ report.confidence.anchor_source or 'N/A' }}
+{% if report.confidence.rationale %}
+- Rationale: {{ report.confidence.rationale }}
+{% endif %}
+
+### Caveats
+{% for caveat in report.caveats %}
+- {{ caveat }}
+{% endfor %}
+
+## Metrics Comparison
+
+| Metric | Before | After | Delta |
+| --- | --- | --- | --- |
+{% for metric in metrics %}
+| {{ metric.label }} | {{ format_value(metric.before) }} | {{ format_value(metric.after) }} | {{ format_delta(metric.before, metric.after) }} |
+{% endfor %}
+
+## Footer
+
+- Tool Version: {{ tool_version }}
+- Generated At: {{ report.generated_at }}
+- Caveat: {{ correlation_caveat }}

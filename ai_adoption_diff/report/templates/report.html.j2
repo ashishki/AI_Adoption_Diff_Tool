@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Analysis Report</title>
+</head>
+<body>
+  <h1>Analysis Report</h1>
+
+  <section>
+    <h2>Summary</h2>
+    <ul>
+      <li><strong>Repo Path:</strong> <code>{{ report.repo_path }}</code></li>
+      <li><strong>Tool Label:</strong> {{ report.tool_label }}</li>
+      <li><strong>Adoption Date:</strong> {{ report.adoption_date }}</li>
+      <li><strong>Window Days:</strong> {{ report.window_days }}</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Confidence</h2>
+    <ul>
+      <li><strong>Score:</strong> {{ format_value(report.confidence.score) }}</li>
+      <li><strong>Level:</strong> {{ report.confidence.level or 'N/A' }}</li>
+      <li><strong>Anchor Source:</strong> {{ report.confidence.anchor_source or 'N/A' }}</li>
+      {% if report.confidence.rationale %}
+      <li><strong>Rationale:</strong> {{ report.confidence.rationale }}</li>
+      {% endif %}
+    </ul>
+  </section>
+
+  <section>
+    <h2>Caveats</h2>
+    <ul>
+      {% for caveat in report.caveats %}
+      <li>{{ caveat }}</li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <section>
+    <h2>Metrics Comparison</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Metric</th>
+          <th>Before</th>
+          <th>After</th>
+          <th>Delta</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for metric in metrics %}
+        <tr>
+          <td>{{ metric.label }}</td>
+          <td>{{ format_value(metric.before) }}</td>
+          <td>{{ format_value(metric.after) }}</td>
+          <td>{{ format_delta(metric.before, metric.after) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <footer>
+    <p>Tool Version: {{ tool_version }}</p>
+    <p>Generated At: {{ report.generated_at }}</p>
+    <p>Caveat: {{ correlation_caveat }}</p>
+  </footer>
+</body>
+</html>
